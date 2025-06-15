@@ -8,7 +8,7 @@ import os
 import requests
 from pytorch_model_definitions import MyImageNetModel # Import your PyTorch model definition
 
-# Define constants
+# Define constants sddsdasd
 MODEL_WEIGHTS_URL = "https://www.dropbox.com/s/b7641ryzmkceoc9/pytorch_model_weights.pth?dl=0"
 MODEL_WEIGHTS_PATH = "pytorch_model_weights.pth"
 ONNX_MODEL_PATH = "mtailor_model.onnx"
