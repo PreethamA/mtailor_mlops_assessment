@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from torch import Tensor
 import numpy as np
-
+from torchvision import models
 from torchvision import transforms
 
 from PIL import Image
@@ -309,13 +309,27 @@ class Classifier(nn.Module):
         img = normalize(img)
         return img
 
+class MyImageNetModel(nn.Module):
+    def __init__(self, num_classes=1000):
+        super(MyImageNetModel, self).__init__()
+        # Load a pre-trained ResNet-18 (weights=None initially, we'll load custom ones)
+        # Make sure num_classes matches your weights, if it's a custom fine-tuned model
+        # otherwise, it's 1000 for ImageNet.
+        self.model = models.resnet18(weights=None) # Start with an uninitialized ResNet-18
+        # If the weights include a different number of output classes than default (1000),
+        # you might need to modify the final layer:
+        # num_ftrs = self.model.fc.in_features
+        # self.model.fc = nn.Linear(num_ftrs, num_classes) # Only if changing the head
+
+    def forward(self, x):
+        return self.model(x)
 
 if __name__ == "__main__":
     mtailor = Classifier(BasicBlock, [2, 2, 2, 2])
     mtailor.load_state_dict(torch.load("./resnet18-f37072fd.pth"))
     mtailor.eval()
     
-    img = Image.open("./n01667114_mud_turtle.JPEG")
+    img = Image.open("data/n01667114_mud_turtle.JPEG")
     inp = mtailor.preprocess_numpy(img).unsqueeze(0) 
     res = mtailor.forward(inp)
 

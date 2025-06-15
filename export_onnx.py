@@ -1,6 +1,9 @@
 import torch
 from pytorch_model import Classifier, BasicBlock
 import torch.onnx
+import os
+print(f"Current working directory at start of main: {os.getcwd()}")
+ONNX_MODEL_PATH = "mtailor_model.onnx"
 
 mtailor = Classifier(BasicBlock, [2, 2, 2, 2])
 mtailor.load_state_dict(torch.load("./resnet18-f37072fd.pth"))
