@@ -4,11 +4,11 @@ import onnxruntime as ort
 from PIL import Image
 import io
 from model import ImagePreprocessor, OnnxModel
-#from convert_to_onx import ONNX_MODEL_PATH # Import path for local testing
 from export_onnx import ONNX_MODEL_PATH
+
 # Ensure data directory and images exist for testing
-SAMPLE_IMAGE_TENCH_PATH = "/app//data/n01440764_tench.jpeg"
-SAMPLE_IMAGE_TURTLE_PATH = "/app//data/n01667114_mud_turtle.jpeg"
+SAMPLE_IMAGE_TENCH_PATH = "data/n01440764_tench.jpeg"
+SAMPLE_IMAGE_TURTLE_PATH = "data/n01667114_mud_turtle.JPEG"
 
 # Pre-defined expected class IDs (from ImageNet)
 EXPECTED_TENCH_ID = 0
@@ -76,11 +76,10 @@ def test_full_inference_pipeline():
     using locally generated ONNX model and preprocessor.
     """
     print("\n--- Testing Full Inference Pipeline ---")
-    print(f"Current working directory in test_full_inference_pipeline: {os.getcwd()}")
+    print(f"Current working directory in test_full_inference_pipeline: {os.getcwd()}") # DEBUG: Print CWD
 
-    # --- ADD THESE DEBUG LINES ---
+    # --- DEBUG LINES FOR TENCH ---
     abs_tench_path = os.path.abspath(SAMPLE_IMAGE_TENCH_PATH)
-    abs_turtle_path = os.path.abspath(SAMPLE_IMAGE_TURTLE_PATH)
     print(f"DEBUG: Absolute path for tench: {abs_tench_path}")
     print(f"DEBUG: Does {abs_tench_path} exist? {os.path.exists(abs_tench_path)}")
     if os.path.exists(abs_tench_path):
@@ -95,17 +94,48 @@ def test_full_inference_pipeline():
         parent_dir = os.path.dirname(abs_tench_path)
         print(f"DEBUG: Listing contents of {parent_dir}:")
         try:
-            for item in os.listdir(parent_dir):
-                print(f"  - {item}")
+            if os.path.exists(parent_dir) and os.path.isdir(parent_dir):
+                for item in os.listdir(parent_dir):
+                    print(f"  - {item}")
+            else:
+                print(f"  Parent directory '{parent_dir}' does not exist or is not a directory.")
         except OSError as e:
             print(f"DEBUG: Could not list directory {parent_dir}: {e}")
+    # --- END DEBUG LINES FOR TENCH ---
 
-    if not os.path.exists(ONNX_MODEL_PATH):
-        print(f"Skipping Full Inference Pipeline test: ONNX model not found at {ONNX_MODEL_PATH}")
-        print("Please run convert_to_onnx.py first.")
-        return False
-    if not os.path.exists(SAMPLE_IMAGE_TENCH_PATH) or not os.path.exists(SAMPLE_IMAGE_TURTLE_PATH):
-        print(f"Skipping Full Inference Pipeline test: Sample images not found in {SAMPLE_IMAGE_TENCH_PATH} directory.")
+    print("\n--- BEGIN DEBUG LINES FOR MUD TURTLE ---")
+    abs_turtle_path = os.path.abspath(SAMPLE_IMAGE_TURTLE_PATH)
+    print(f"DEBUG: Absolute path for mud turtle: {abs_turtle_path}")
+    print(f"DEBUG: Does {abs_turtle_path} exist? {os.path.exists(abs_turtle_path)}")
+    if os.path.exists(abs_turtle_path):
+        try:
+            turtle_stat = os.stat(abs_turtle_path)
+            print(f"DEBUG: Mud Turtle file permissions (octal): {oct(turtle_stat.st_mode)}")
+            print(f"DEBUG: Mud Turtle file size: {turtle_stat.st_size} bytes")
+        except OSError as e:
+            print(f"DEBUG: Could not get stats for mud turtle: {e}")
+    else:
+        parent_dir = os.path.dirname(abs_turtle_path)
+        print(f"DEBUG: Listing contents of {parent_dir}:")
+        try:
+            if os.path.exists(parent_dir) and os.path.isdir(parent_dir):
+                for item in os.listdir(parent_dir):
+                    print(f"  - {item}")
+            else:
+                print(f"  Parent directory '{parent_dir}' does not exist or is not a directory.")
+        except OSError as e:
+            print(f"DEBUG: Could not list directory {parent_dir}: {e}")
+    print("--- END DEBUG LINES FOR MUD TURTLE ---\n")
+
+    # The conditional check to skip the test
+    if not os.path.exists(SAMPLE_IMAGE_TENCH_PATH) or \
+       not os.path.exists(SAMPLE_IMAGE_TURTLE_PATH):
+        print(f"Skipping Full Inference Pipeline test: One or both sample images not found.")
+        # For more specific error reporting:
+        if not os.path.exists(SAMPLE_IMAGE_TENCH_PATH):
+            print(f"Reason: '{SAMPLE_IMAGE_TENCH_PATH}' was not found.")
+        if not os.path.exists(SAMPLE_IMAGE_TURTLE_PATH):
+            print(f"Reason: '{SAMPLE_IMAGE_TURTLE_PATH}' was not found.")
         return False
 
     preprocessor = ImagePreprocessor()
@@ -171,12 +201,14 @@ if __name__ == "__main__":
     if not os.path.exists("data"):
         os.makedirs("data")
         print("Created 'data' directory. Please place sample images inside it.")
+        print("Required images: n01440764_tench.jpeg, n01667114_mud_turtle.jpeg")
 
     # You might want to run convert_to_onnx.py first if it hasn't been run
     if not os.path.exists(ONNX_MODEL_PATH):
         print("\nWARNING: model.onnx not found. Attempting to run convert_to_onnx.py...")
         try:
             import subprocess
+            # Ensure convert_to_onnx.py is executable
             subprocess.run(["python", "convert_to_onnx.py"], check=True)
             print("convert_to_onnx.py executed successfully.")
         except Exception as e:
