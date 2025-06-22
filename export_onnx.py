@@ -6,7 +6,8 @@ print(f"Current working directory at start of main: {os.getcwd()}")
 ONNX_MODEL_PATH = "mtailor_model.onnx"
 
 mtailor = Classifier(BasicBlock, [2, 2, 2, 2])
-mtailor.load_state_dict(torch.load("./resnet18-f37072fd.pth"))
+#mtailor.load_state_dict(torch.load("./resnet18-f37072fd.pth"))
+mtailor.load_state_dict(torch.load("./pytorch_model_weights.pth"))
 mtailor.eval()
 
 dummy_input = torch.randn(1, 3, 224, 224)
